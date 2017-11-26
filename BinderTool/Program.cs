@@ -581,11 +581,19 @@ namespace BinderTool
                 TpfFile tpfFile = TpfFile.OpenTpfFile(inputStream);
                 foreach (var entry in tpfFile.Entries)
                 {
-                    string outputFilePath = Path.Combine(options.OutputPath, entry.FileName);
+                    string outputFilePath = Path.Combine(options.OutputPath,
+                        TruncateInvalidPathChars(entry.FileName));
                     Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
                     File.WriteAllBytes(outputFilePath, entry.Data);
                 }
             }
+        }
+
+        private static string TruncateInvalidPathChars(string path)
+        {
+            string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
+            return r.Replace(path, "");
         }
 
         private static void UnpackBhf4File(Options options)
